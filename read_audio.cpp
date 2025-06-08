@@ -58,6 +58,21 @@ void printAudioLength(RenderWindow &window, float duration, float curLen, Font &
     window.draw(text);
 }
 
+void amplifyBuffer(SoundBuffer &buffer, float factor)
+{
+    const Int16 *samples = buffer.getSamples();
+    size_t sampleCount = buffer.getSampleCount();
+    Int16 *amplifiedSamples = new Int16[sampleCount];
+
+    for (size_t i = 0; i < sampleCount; ++i)
+    {
+        amplifiedSamples[i] = static_cast<Int16>(samples[i] * factor);
+    }
+
+    buffer.loadFromSamples(amplifiedSamples, sampleCount, buffer.getChannelCount(), buffer.getSampleRate());
+    delete[] amplifiedSamples;
+}
+
 int main(int argc, char const *argv[])
 {
     if (argc < 2)
@@ -80,6 +95,10 @@ int main(int argc, char const *argv[])
     unsigned int channelCount = buffer.getChannelCount();
     string selectedDevice = SoundRecorder::getDefaultDevice();
     float duration = buffer.getDuration().asSeconds();
+
+    float amplifier = argc == 3 ? stof(argv[2]) : 1.0f;
+    amplifyBuffer(buffer, amplifier);
+
     bool isPlaying = false;
 
     cout << "Sample Rate: " << sampleRate << " Hz" << endl;
